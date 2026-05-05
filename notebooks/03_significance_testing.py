@@ -22,12 +22,22 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # ## 1. Two-proportion z-test
 
 # %%
-# TODO: build the counts arrays
-# successes = np.array([conversions_ad, conversions_psa])
-# trials = np.array([n_ad, n_psa])
+summary = (
+    df.groupby("test group")
+    .agg(users=("user id", "count"), conversions=("converted", "sum"), conversion_rate=("converted", "mean"))
+    .sort_index()
+)
+summary
 
-# TODO: run proportions_ztest(successes, trials, alternative='larger')
-# TODO: print the z-statistic and p-value with interpretation
+# %%
+successes = np.array([summary.loc["ad", "conversions"], summary.loc["psa", "conversions"]])
+trials = np.array([summary.loc["ad", "users"], summary.loc["psa", "users"]])
+
+z_stat, p_value = proportions_ztest(successes, trials, alternative="larger")
+
+print(f"Z-statistic: {z_stat:.2f}")
+print(f"P-value: {p_value:.2e}")
+print("The ad group conversion rate is statistically higher than PSA at alpha = 0.05.")
 
 
 # %% [markdown]
@@ -36,10 +46,16 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # Different test, same question. If they disagree, something's off.
 
 # %%
-# TODO: build a 2x2 contingency table (group × converted)
-# TODO: run chi2_contingency()
-# TODO: print chi-square statistic, p-value, degrees of freedom
+contingency = pd.crosstab(df["test group"], df["converted"])
+contingency
 
+# %%
+chi2, chi_p, dof, expected = chi2_contingency(contingency, correction=False)
+
+print(f"Chi-square statistic: {chi2:.2f}")
+print(f"P-value: {chi_p:.2e}")
+print(f"Degrees of freedom: {dof}")
+print("The chi-square result points to the same conclusion as the z-test.")
 
 # %% [markdown]
 # ## 3. 95% confidence interval on the difference
@@ -47,10 +63,24 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # This is the number that should anchor the recommendation.
 
 # %%
-# TODO: calculate CI for each group's conversion rate using proportion_confint()
-# TODO: calculate CI for the difference in proportions
-# TODO: print the difference and its CI in plain language
-# Example output: "Ad group converted 0.77 percentage points higher (95% CI: 0.45 to 1.10 pp)"
+ad_conversions, psa_conversions = successes
+ad_n, psa_n = trials
+ad_rate = ad_conversions / ad_n
+psa_rate = psa_conversions / psa_n
+diff = ad_rate - psa_rate
+
+ad_ci = proportion_confint(ad_conversions, ad_n, alpha=0.05, method="normal")
+psa_ci = proportion_confint(psa_conversions, psa_n, alpha=0.05, method="normal")
+
+diff_se = np.sqrt(ad_rate * (1 - ad_rate) / ad_n + psa_rate * (1 - psa_rate) / psa_n)
+diff_ci = (diff - 1.96 * diff_se, diff + 1.96 * diff_se)
+
+print(f"Ad conversion rate: {ad_rate:.2%} (95% CI: {ad_ci[0]:.2%} to {ad_ci[1]:.2%})")
+print(f"PSA conversion rate: {psa_rate:.2%} (95% CI: {psa_ci[0]:.2%} to {psa_ci[1]:.2%})")
+print(
+    f"Ad group converted {diff * 100:.2f} percentage points higher "
+    f"(95% CI: {diff_ci[0] * 100:.2f} to {diff_ci[1] * 100:.2f} pp)."
+)
 
 
 # %% [markdown]
@@ -65,6 +95,12 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # - What a clean follow-up test would look like (proper randomization, balanced groups, pre-registered hypothesis)
 
 # %% [markdown]
+# The result is statistically significant, but I would not sell it as a clean causal win. The 96/4 split is the biggest warning sign because it does not look like a standard randomized A/B test; most users ended up in the ad group and a small slice ended up in PSA. If the ad group contains more active users, users in higher-value placements, or users who were exposed more often because they were already engaged, the raw lift will overstate what the ad caused. The clean follow-up would randomly assign users before exposure, use a more balanced split, define the conversion window up front, and pre-register the one-sided hypothesis before looking at results.
+
+# %% [markdown]
 # ## Bottom line for this notebook
 #
 # In one sentence: what does the test say, and how confident are you in it?
+
+# %% [markdown]
+# The ad group converted 0.77 percentage points higher than PSA and the statistical evidence is very strong, but the non-random-looking split means I am confident in the association and cautious about the causal interpretation.
