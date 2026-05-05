@@ -8,6 +8,14 @@ The ad group converted at **2.55%** versus **1.79%** for the PSA group. That is 
 
 That looks good at first glance, but I would not call this a clean win yet. The test split was roughly **96% ad / 4% PSA**, which makes me cautious about how users were assigned. My read: the campaign is worth a cleaner follow-up test, but I would not scale spend hard from this result alone.
 
+## Visuals
+
+![Conversion by group](visuals/conversion_by_group.png)
+
+![Conversion by exposure intensity](visuals/conversion_by_exposure.png)
+
+![Conversion by day](visuals/conversion_by_day.png)
+
 ## Dataset
 
 - **Source:** [Marketing A/B Testing - Kaggle](https://www.kaggle.com/datasets/faviovaz/marketing-ab-testing)
@@ -62,14 +70,6 @@ pip install -r requirements.txt
 # Download marketing_AB.csv from the Kaggle link above and place it in data/
 # Then run the notebooks in order: 01 -> 02 -> 03 -> 04
 ```
-
-## Visuals
-
-![Conversion by group](visuals/conversion_by_group.png)
-
-![Conversion by exposure intensity](visuals/conversion_by_exposure.png)
-
-![Conversion by day](visuals/conversion_by_day.png)
 
 ---
 
