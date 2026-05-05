@@ -70,3 +70,7 @@ pip install -r requirements.txt
 # Download marketing_AB.csv from the Kaggle link above and place it in data/
 # Then run the notebooks in order: 01 -> 02 -> 03 -> 04
 ```
+
+---
+
+*Built by Faisal Alsurayhi as part of a data analyst portfolio.*
