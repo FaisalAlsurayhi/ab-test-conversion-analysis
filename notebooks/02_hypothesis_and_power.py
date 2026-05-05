@@ -35,11 +35,23 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # Calculate the actual conversion rates and the difference between groups.
 
 # %%
-# TODO: get conversion rate for ad group (p1)
-# TODO: get conversion rate for PSA group (p2)
-# TODO: calculate observed difference (p1 - p2)
-# TODO: calculate Cohen's h effect size using proportion_effectsize()
+summary = (
+    df.groupby("test group")
+    .agg(users=("user id", "count"), conversions=("converted", "sum"), conversion_rate=("converted", "mean"))
+    .sort_index()
+)
+summary
 
+# %%
+p1 = summary.loc["ad", "conversion_rate"]
+p2 = summary.loc["psa", "conversion_rate"]
+observed_diff = p1 - p2
+effect_size = proportion_effectsize(p1, p2)
+
+print(f"Ad conversion rate: {p1:.2%}")
+print(f"PSA conversion rate: {p2:.2%}")
+print(f"Observed difference: {observed_diff * 100:.2f} percentage points")
+print(f"Cohen's h: {effect_size:.4f}")
 
 # %% [markdown]
 # ## 2. Power given actual sample sizes
@@ -47,9 +59,37 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # Given how the groups are split, what's the smallest effect we could reliably detect?
 
 # %%
-# TODO: get n1 (ad group size) and n2 (PSA group size)
-# TODO: calculate the ratio n2/n1 (this is the imbalance)
-# TODO: use NormalIndPower().solve_power() to find the minimum detectable effect at 80% power
+n1 = summary.loc["ad", "users"]
+n2 = summary.loc["psa", "users"]
+ratio = n2 / n1
+
+power_analysis = NormalIndPower()
+observed_power = power_analysis.power(
+    effect_size=effect_size,
+    nobs1=n1,
+    alpha=0.05,
+    ratio=ratio,
+    alternative="larger",
+)
+
+mde_h = power_analysis.solve_power(
+    effect_size=None,
+    nobs1=n1,
+    alpha=0.05,
+    power=0.80,
+    ratio=ratio,
+    alternative="larger",
+)
+
+# Convert Cohen's h back to an approximate percentage-point lift around the PSA baseline.
+mde_rate = np.sin(np.arcsin(np.sqrt(p2)) + mde_h / 2) ** 2
+mde_pp = mde_rate - p2
+
+print(f"Ad users: {n1:,}")
+print(f"PSA users: {n2:,}")
+print(f"Sample-size ratio (PSA/ad): {ratio:.4f}")
+print(f"Observed power: {observed_power:.3f}")
+print(f"Minimum detectable effect at 80% power: {mde_pp * 100:.2f} percentage points")
 
 
 # %% [markdown]
@@ -62,4 +102,5 @@ df = df.loc[:, ~df.columns.str.startswith("Unnamed")]
 # - Even with massive total N, why does this matter?
 
 # %%
-# Write your discussion as a markdown cell or print() output
+# %% [markdown]
+# A cleaner experiment would have used a balanced or near-balanced split, because the smaller PSA group controls the precision of the comparison. Here, the total sample is huge, but only 23,524 users are in the PSA group, so the effective comparison is much smaller than the headline 588k rows suggests. The observed lift is large enough that the test is still highly powered, but the 96/4 split is a warning sign about assignment quality. Power tells me the dataset can detect small differences; it does not solve the bigger problem that users may not have been randomly assigned.
