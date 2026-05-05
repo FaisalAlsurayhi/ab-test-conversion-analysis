@@ -128,7 +128,15 @@ hour_summary.head()
 
 # %%
 fig, ax = plt.subplots(figsize=(7, 4))
-sns.barplot(data=group_counts, x="test_group", y="users", ax=ax, palette=["#2f6f73", "#c77d3b"])
+sns.barplot(
+    data=group_counts,
+    x="test_group",
+    y="users",
+    hue="test_group",
+    legend=False,
+    ax=ax,
+    palette=["#2f6f73", "#c77d3b"],
+)
 ax.set_title("A/B test group sizes")
 ax.set_xlabel("Test group")
 ax.set_ylabel("Users")
@@ -150,6 +158,8 @@ sns.barplot(
     data=conversion_plot,
     x="test group",
     y="conversion_rate",
+    hue="test group",
+    legend=False,
     ax=ax,
     palette=["#2f6f73", "#c77d3b"],
 )
