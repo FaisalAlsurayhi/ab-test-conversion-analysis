@@ -2,9 +2,11 @@
 
 > **Business question:** Did the ad campaign drive enough lift in conversion to justify scaling the spend?
 
-## TL;DR Finding
+## TL;DR
 
-The ad group converted at **2.55%** versus **1.79%** for the PSA group, a **0.77 percentage-point lift** and about **43% relative lift**. The result is statistically significant, but the experiment split was heavily imbalanced at roughly **96% ad / 4% PSA**, so I would treat the lift as a strong signal rather than clean proof of causality. My recommendation is to keep the campaign directionally alive, but run a properly randomized follow-up before scaling spend.
+The ad group converted at **2.55%** versus **1.79%** for the PSA group. That is a **0.77 percentage-point lift**, or about **43% higher** than PSA.
+
+That looks good at first glance, but I would not call this a clean win yet. The test split was roughly **96% ad / 4% PSA**, which makes me cautious about how users were assigned. My read: the campaign is worth a cleaner follow-up test, but I would not scale spend hard from this result alone.
 
 ## Dataset
 
@@ -15,25 +17,25 @@ The ad group converted at **2.55%** versus **1.79%** for the PSA group, a **0.77
 
 ## Approach
 
-- Checked the data shape, missing values, group sizes, and conversion rates.
-- Compared conversion between the ad group and PSA group.
-- Ran a one-sided two-proportion z-test and cross-checked it with a chi-square test.
-- Calculated the confidence interval around the lift so the recommendation is anchored on effect size, not just p-values.
-- Cut the results by day, hour, and exposure intensity to see where the lift was strongest.
+- Checked the basics first: row count, missing values, group sizes, and conversion rates.
+- Compared conversion for ad users against PSA users.
+- Ran a one-sided two-proportion z-test and checked the result with chi-square.
+- Calculated a confidence interval for the lift, because the size of the effect matters more than just "significant or not."
+- Looked at day, hour, and exposure cuts to see where the lift was coming from.
 
 ## Key Findings
 
 - **The ad group converted higher:** ad users converted at **2.55%** vs **1.79%** for PSA, a **0.77 percentage-point lift**.
-- **The result is statistically strong:** the one-sided z-test returned **z = 7.37** and **p = 8.53e-14**; the chi-square check agreed with **p = 1.71e-13**.
-- **The practical effect is bounded:** the 95% confidence interval for the lift is **0.60 to 0.94 percentage points**.
-- **The split is the main caveat:** **564,577 users** were in the ad group and only **23,524** were in PSA, so the raw lift may reflect selection bias as well as ad impact.
-- **Segments point to useful follow-up targets:** Tuesday had the strongest raw day-level lift, followed by Monday, and the strongest practical response window appears to be afternoon/evening.
+- **The result is statistically strong:** the one-sided z-test returned **z = 7.37** and **p = 8.53e-14**. The chi-square check told the same story with **p = 1.71e-13**.
+- **The lift is not just noise:** the 95% confidence interval is **0.60 to 0.94 percentage points**.
+- **The split is the part I do not love:** **564,577 users** were in the ad group and only **23,524** were in PSA. That kind of imbalance makes selection bias a real concern.
+- **The best follow-up targets are timing-based:** Tuesday had the strongest raw day-level lift, followed by Monday. Afternoon/evening hours also looked promising.
 
 ## Recommendation
 
-I would not scale spend aggressively off this test alone. The campaign looks promising, but the assignment pattern is too lopsided for me to call the observed lift a clean causal effect.
+I would not scale spend aggressively off this test alone. The campaign looks promising, but the assignment pattern is too lopsided for me to treat the observed lift as a clean causal effect.
 
-The next move is a cleaner follow-up test: randomly assign users before exposure, use a more balanced treatment/control split, define the conversion window up front, and focus the test around the strongest day and hour windows from this analysis. If that follow-up reproduces even part of the 0.77 percentage-point lift, then scaling becomes a much easier call.
+The next move is a cleaner follow-up test. I would randomly assign users before exposure, use a more balanced treatment/control split, define the conversion window up front, and focus the test around the strongest day and hour windows from this analysis. If that follow-up reproduces even part of the 0.77 percentage-point lift, scaling becomes a much easier call.
 
 ## Limitations
 
