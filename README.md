@@ -29,7 +29,7 @@ That looks good at first glance, but I would not call this a clean win yet. The 
 - **The result is statistically strong:** the one-sided z-test returned **z = 7.37** and **p = 8.53e-14**. The chi-square check told the same story with **p = 1.71e-13**.
 - **The lift is not just noise:** the 95% confidence interval is **0.60 to 0.94 percentage points**.
 - **The split is the part I do not love:** **564,577 users** were in the ad group and only **23,524** were in PSA. That kind of imbalance makes selection bias a real concern.
-- **The best follow-up targets are timing-based:** Tuesday had the strongest raw day-level lift, followed by Monday. Afternoon/evening hours also looked promising.
+- **Timing patterns hint at useful follow-up targets:** Tuesday had the strongest raw day-level lift, followed by Monday, and afternoon/evening hours also looked promising. I would still treat those cuts as directional because the same selection issue applies.
 
 ## Recommendation
 
@@ -39,10 +39,10 @@ The next move is a cleaner follow-up test. I would randomly assign users before 
 
 ## Limitations
 
-- Selection bias: groups may not have been randomly assigned, so observed lift likely overstates the true causal effect.
-- No timestamp granularity beyond day/hour, so I cannot fully separate timing effects from audience behavior.
-- Conversion is binary; the dataset does not include purchase value, revenue, or downstream lifetime value.
-- Exposure intensity is confounded: frequent users see more ads and may have been more likely to convert anyway.
+- The biggest issue is selection bias. The groups may not have been randomly assigned, so the observed lift could be overstating the true campaign effect.
+- Timing is limited to day and hour. That is useful, but not enough to fully separate campaign timing from audience behavior.
+- The conversion field is binary, so I cannot tell whether the ad group brought in higher-value customers or just more customers.
+- Exposure intensity is messy: frequent users see more ads, and those same users may have been more likely to convert anyway.
 
 ## Reproducibility
 
@@ -59,7 +59,7 @@ venv\Scripts\activate  # Windows
 # Install dependencies
 pip install -r requirements.txt
 
-# Download the dataset from Kaggle and place marketing_AB.csv in data/
+# Download marketing_AB.csv from the Kaggle link above and place it in data/
 # Then run the notebooks in order: 01 -> 02 -> 03 -> 04
 ```
 
@@ -67,9 +67,9 @@ pip install -r requirements.txt
 
 ![Conversion by group](visuals/conversion_by_group.png)
 
-![Conversion by day](visuals/conversion_by_day.png)
-
 ![Conversion by exposure intensity](visuals/conversion_by_exposure.png)
+
+![Conversion by day](visuals/conversion_by_day.png)
 
 ---
 
